@@ -168,6 +168,7 @@ logging.basicConfig(
 
 
 
+
 # pp = trikit.load(lob="pp_auto")
 # ppi = trikit._Incremental(pp, origin="ORIGIN", dev="DEV_PERIOD", value="INCRD_LOSS")
 # ppc = trikit._Cumulative(pp, origin="ORIGIN", dev="DEV_PERIOD", value="INCRD_LOSS")
@@ -177,6 +178,10 @@ logging.basicConfig(
 # wcc = trikit._Cumulative(wc, origin="ORIGIN", dev="DEV_PERIOD", value="INCRD_LOSS")
 
 ff = "U:\\Repos\\trikit\\datasets\\RAA.csv"
+
+raa = pd.read_csv(ff)
+
+
 ppi = trikit._Incremental(ff, origin="ORIGIN", dev="DEV", value="VALUE")
 ppc = trikit._Cumulative(ff, origin="ORIGIN", dev="DEV", value="VALUE")
 

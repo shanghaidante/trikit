@@ -139,6 +139,11 @@ decimals = pd.Series([0]*10, index=range(10))
 rinc.round(decimals)
 print(type(rinc))
 
+
+i = rinc
+c = rinc.cumsum(axis=1)
+
+
 col = df[['NOTES']]
 if __name__ == "__main__":
     return (word.startswith('a'))

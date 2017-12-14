@@ -9,16 +9,16 @@ import logging
 
 
 
-__all__ = ["BaseTriangle", "_Incremental", "_Cumulative"]
+# __all__ = ["BaseTriangle", "_Incremental", "_Cumulative"]
 
 
 
 
-logging.basicConfig(
-        filename="U:/Repos/trikit/Logs/trikitLogs.txt",
-        level=logging.DEBUG,
-        format='%(asctime)s - %(levelname)s - %(message)s'
-        )
+# logging.basicConfig(
+#         filename="U:/Repos/trikit/Logs/trikitLogs.txt",
+#         level=logging.DEBUG,
+#         format='%(asctime)s - %(levelname)s - %(message)s'
+#         )
 
 
 
@@ -536,14 +536,13 @@ class Cumulative(_BaseTriangle):
     def a2a_avgs(self, addl_avgs=None, func=None, **kwargs):
         """
         Return a DataFrame of various age-to-age factor averages.
-        **kwargs can contain a user-defined function that computes
-        a non-standard average for age-to-age factors. Set 'func' to
-        the average computing function, that takes 1 argument, namely
-        the column of values that will be averaged by each average
-        duration present in self._nbr_periods.
+        func can be a user-defined function that computes
+        a non-standard age-to-age factor average. Set func to
+        the average computing function, which should take 1
+        argument, namely the column of values that will be
+        averaged by each average duration present in
+        self._nbr_periods.
         """
-        #pd.options.display.float_format = '{:.5f}'.format
-
         dfc = self._triangle
         dfa = self.a2a
         ncols = self.a2a.shape[1]
@@ -673,28 +672,105 @@ class Cumulative(_BaseTriangle):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 # =============================================================================
-# Unified Implementation
+# Revised Implementation                                                      |
 # =============================================================================
 
+import pandas as pd
+import numpy as np
+import scipy
+import os
+import sys
+import collections
+import datetime
+import os.path
 
-class Triangle:
 
-    def __init__(self, data, origin=None, dev=None, value=None):
+pd.set_option('display.max_columns', 1000)
+pd.set_option('display.width', 500)
+
+
+
+class Triangle(pd.DataFrame):
+
+    """
+    Revised and updated Loss Triangle class.
+    """
+    def __init__(self, data, origin=None, dev=None, value=None, inc=True):
+        """Transform a dataset into a loss triangle."""
+
+        # keep only necessary fields, and aggregate by origin & dev =>
+        try:
+            data = data[[origin, dev, value]]
+            data = data.groupby([origin, dev], as_index=False).sum()
+
+        except KeyError:
+            print("Invalid key specified.")
+
+        # transform dataset into incremental loss triangle =>
+        tri = data.pivot(index=origin, columns=dev).rename_axis(None)
+        tri.columns = tri.columns.droplevel(0)
+
+        pd.DataFrame.__init__(self, tri)
+        self._tri = tri
+        self.origin = origin
+        self.value = value
+        self.dev = dev
+        self.inc = inc
+
+        # _is_cum manages triangle state of instance
+        self._is_cum = False if self.inc==True else False
+
+
+        # properties
+        self._latest_diag = None
+        self._dev_periods = None
+        self._origin_yrs = None
+
+
+
+
+
+
+    @property
+    def latest_diag(self) -> np.ndarray:
         """
-        Transform data into a loss development triangle. `data` can be
-        either a path to a delimited file or a pandas DataFrame.
+        Return latest diagonal.
+        """
+        if self._latest_diag is None:
+            self._latest_diag = \
+                [self._tri.loc[self._tri[i].last_valid_index(),i]
+                     for i in self._tri]
+        return(np.array(self._latest_diag))
+
+
+
+    @property
+    def dev_periods(self):
+        """
+        Return Triangle development periods.
+        """
+        if self._dev_periods is None:
+            self._dev_periods = self._tri.columns
+        return (np.array(self._dev_periods))
+
+
+
+
+    @property
+    def origin_yrs(self):
+        """
+        Return Triangle origin years.
+        """
+        if self._origin_yrs is None:
+            self._origin_yrs = np.array(self._tri.index)
+        return(np.array(self._origin_yrs))
+
+
+
+    def inc2cum(self):
+        """
+        Return cumulated incremental triangle.
         """
 
 
@@ -707,79 +783,9 @@ class Triangle:
 
 
 
-"""Transform a dataset into a loss triangle."""
-if isinstance(data, pd.DataFrame):
-    dataset = data
-elif os.path.isfile(data):  # read delimited file into DataFrame
-    if sep is None:  # use csv module to identify delimiter
-        with open(data, "r") as f:
-            hdr = next(f).replace(" ", "")
-            snfr = csv.Sniffer()
-            dialect = snfr.sniff(hdr)
-            sep = dialect.delimiter
-
-    dataset = pd.read_table(data, sep=sep)
-
-# keep only necessary fields, and aggregate by origin & dev =>
-dataset = dataset[[origin, dev, value]]
-dataset = dataset.groupby([origin, dev], as_index=False).sum()
-
-# transform dataset into incremental loss triangle =>
-tri = dataset.pivot(index=origin, columns=dev).rename_axis(None)
-tri.columns = tri.columns.droplevel(0)
-
-pd.DataFrame.__init__(self, tri)
-self._triangle = tri
-self._iscumulative = None
-self._latest_diagonal = None
-self._dev_periods = None
-self._origin_yrs = None
-self.tri_field = None
-self.tri_desc = None
-self.tritype = None
-self.origin = origin
-self.value = value
-self.data = data
-self.dev = dev
-self.sep = sep
-# self.inc = inc
-
-
-def __init__(self, data, sep=None, origin=None, dev=None,
-         value=None):
-BaseTriangle.__init__(self, data, sep, origin, dev, value)
-hdr = list(self._triangle.columns.values)
-indx = list(self._triangle.index.values)
-
-for i in range(len(indx)):
-
-    iteridx = indx[i]
-    lastidx = len(indx) - 1 - i
-
-    for j in range(len(hdr)):
-
-        iterhdr = hdr[j]
-
-        if j <= lastidx:
-
-            if self._triangle.iloc[i, j] < 1:
-                self._triangle.set_value(iteridx, iterhdr, 1.)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ff = "U:\\Repos\\trikit\\datasets\\RAA.csv"
+raa = pd.read_csv(ff)
+t = Triangle(raa, origin='ORIGIN', dev='DEV', value='VALUE')
+print(t.latest_diag)
+print(t.dev_periods)
+print(t.origin_yrs)

@@ -16,8 +16,9 @@ df = pd.read_csv(fdata1,
                           'FIRE_CALIBRATION_LVL_OCC', 'LOSS_YR', 'DEV_PERIOD',
                           'INCRED_LOSS_NET_OF_SS_DED','PAID_LOSS_NET_OF_SS_AND_DED',
                           'ALAE', 'INCRD_ALAE_NET_OF_SS_AND_DED', 'CAT_IND', 'TIER',
-                          'DISTRBN_BRANCH']
-                 )
+                          'DISTRBN_BRANCH'])
+
+
 
 
 # rename columns =>
@@ -492,8 +493,6 @@ for i in range(accident_years):
     results[i] = iterarr
 
 inc = pd.DataFrame(data=results, index=index)
-
-
 
 
 inc = pd.DataFrame({
