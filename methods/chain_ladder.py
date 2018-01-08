@@ -6,6 +6,8 @@ import numpy as np
 import scipy
 import matplotlib.pyplot as plt
 import seaborn as sns
+from trikit.triangle import _BaseTriangle, _IncrTriangle, _CumTriangle, _Triangle
+
 
 
 class BaseMethod:
@@ -36,17 +38,39 @@ class ChainLadder:
     The ChainLadder constructor takes the specified age-2-age average,
     along with a tail factor, and squares the triangle.
     """
-    def __init__(self, triangle, selection='all-weighted', tail_factor=1.0):
-        #BaseTriangle.__init__(self, data, sep, origin, dev, value, cumulative=False)
-        self.triangle = triangle
+    def __init__(self, data, **kwargs):
+
+        origin    = kwargs.get('origin'   ,          None)
+        dev       = kwargs.get('dev'      ,          None)
+        value     = kwargs.get('value'    ,          None)
+        trisize   = kwargs.get('trisize'  ,          None)
+        tail_fact = kwargs.get('tail_fact',           1.0)
+        selection = kwargs.get('selection','all-weighted')
+
+        # Convert data to _CumTriangle if not already.
+        if not isinstance(data, _CumTriangle):
+
+
+
+            if set(['origin','dev','value']).issubset(kwargs.keys()):
+                pass
+
+
+        self.tri       = tri
         self.selection = selection
-        self.tail_factor = tail_factor
+        self.tail_fact = tail_fact
+
         self.a2a_avgs = self.triangle.a2a_avgs()
+
         self.selection_vals = self.a2a_avgs.loc[[selection,]]
+
         self.selection_vals['Ultimate'] = self.tail_factor
+
+        # properties
         self._squared_triangle = None
         self._ultimates = None
         self._age2ult = None
+
 
 
 
@@ -72,16 +96,21 @@ class ChainLadder:
 
 
     @property
-    def squared_triangle(self):
+    def squared_tri(self):
         """
         Project claims growth for each future development period. Returns a
         DataFrame of loss projections for each development period.
         """
         if self._squared_triangle is None:
+
             sqrdtri = self.triangle.copy(deep=True)
+
             tricols = sqrdtri.columns
+
             trirows = sqrdtri.index
+
             a2a = np.ravel(self.selection_vals.values)
+
             nrows, ncols = self.triangle.shape
 
             for colpos in range(ncols):
@@ -99,7 +128,7 @@ class ChainLadder:
                             adjacent_cell = sqrdtri.iloc[rowpos, colpos - 1]
                             sqrdtri.iloc[rowpos, colpos] = adjacent_cell * itera2a
 
-            # append ultimates to sqrdtri =>
+            # append ultimates to sqrdtri
             sqrdtri = pd.merge(sqrdtri, self.ultimates,
                                    right_index=True, left_index=True)
 
@@ -134,6 +163,7 @@ class ChainLadder:
         else:
             ultsdf = self._ultimates
         return(ultsdf)
+
 
 
 

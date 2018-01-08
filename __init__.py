@@ -60,49 +60,41 @@ import sys
 import collections
 import datetime
 import os.path
-from .triangle import _BaseTriangle, _Incremental, _Cumulative
-from .datasets import loss_data
-from .methods import chain_ladder, bootstrap
+from .triangle import _BaseTriangle, _IncrTriangle, _CumTriangle, _Triangle
+# from .datasets import loss_data
+#from .methods import chain_ladder, bootstrap
+from .utils import *
+
+#from .utils import LOBS
+
 
 # extend PYTHONPATH `trikit` base directory
 #sys.path.extend([
-print(os.path.realpath(__file__))
+# print(os.path.realpath(__file__))
 
 
+# make available at top-level of trikit
+# ChainLadder = chain_ladder.ChainLadder
+# Bootstrap = bootstrap.Bootstrap
 
-# make available at trikit top-level
-ChainLadder = chain_ladder.ChainLadder
-Bootstrap = bootstrap.Bootstrap
+
 
 # make sample datasets available at trikit top-level
-load = loss_data.load
-lobs = loss_data.lobs
+#load = loss_data.load
+
 
 
 pd.set_option('display.max_columns', 1000)
 pd.set_option('display.width', 500)
 
 np.set_printoptions(
-        edgeitems=3,
-        linewidth=200,
-        suppress=True,
-        nanstr='NaN',
-        infstr='Inf',
-        formatter={'float_kind':'{:0.2f}'.format},
-        precision=np.get_printoptions()['precision']
-        )
-
-# default np.set_printoptions =>
-# np.set_printoptions(
-#     edgeitems=3,
-#     infstr='inf',
-#     linewidth=75,
-#     nanstr='nan',
-#     precision=8,
-#     suppress=False,
-#     threshold=1000,
-#     formatter=None
-#     )
+            edgeitems=3,
+            linewidth=200,
+            suppress=True,
+            nanstr='NaN',
+            infstr='Inf',
+            precision=5
+            )
 
 
 # pd.set_option('display.chop_threshold', 1.00)
@@ -124,26 +116,17 @@ np.set_printoptions(
 # pd.options.display.float_format = '{:.2f}'.format
 # pd.options.display.float_format = '{:10.0f}'.format
 
-curr_yr = datetime.datetime.today().strftime('%Y')
-results = collections.OrderedDict()
-accident_years = 10
-init_accident_year = int(curr_yr)-accident_years
-index = list(range(init_accident_year, int(curr_yr)))
-
-for i in range(accident_years):
-    iterarr = np.random.lognormal(10, .5, accident_years-i).tolist()
-    iterarr.extend([np.NaN]*i)
-    results[i] = iterarr
-rinc = pd.DataFrame(data=results, index=index)
-decimals = pd.Series([0]*10, index=range(10))
-rinc.round(decimals)
-print(type(rinc))
-
-
-i = rinc
-c = rinc.cumsum(axis=1)
-
-
-col = df[['NOTES']]
-if __name__ == "__main__":
-    return (word.startswith('a'))
+# curr_yr = datetime.datetime.today().strftime('%Y')
+# results = collections.OrderedDict()
+# accident_years = 10
+# init_accident_year = int(curr_yr)-accident_years
+# index = list(range(init_accident_year, int(curr_yr)))
+#
+# for i in range(accident_years):
+#     iterarr = np.random.lognormal(10, .5, accident_years-i).tolist()
+#     iterarr.extend([np.NaN]*i)
+#     results[i] = iterarr
+# rinc = pd.DataFrame(data=results, index=index)
+# decimals = pd.Series([0]*10, index=range(10))
+# rinc.round(decimals)
+# print(type(rinc))

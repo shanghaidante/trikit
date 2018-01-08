@@ -26,4 +26,6 @@ venv
 ./venv
 ./venv/*
 .spyder*
+.editorconfig
+
 
