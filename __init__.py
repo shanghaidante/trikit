@@ -61,11 +61,8 @@ import collections
 import datetime
 import os.path
 from .triangle import _BaseTriangle, _IncrTriangle, _CumTriangle, _Triangle
-# from .datasets import loss_data
-#from .methods import chain_ladder, bootstrap
+from .chain_ladder import *
 from .utils import *
-
-#from .utils import LOBS
 
 
 # extend PYTHONPATH `trikit` base directory
@@ -74,7 +71,7 @@ from .utils import *
 
 
 # make available at top-level of trikit
-# ChainLadder = chain_ladder.ChainLadder
+ChainLadder = chain_ladder.ChainLadder
 # Bootstrap = bootstrap.Bootstrap
 
 
@@ -93,7 +90,7 @@ np.set_printoptions(
             suppress=True,
             nanstr='NaN',
             infstr='Inf',
-            precision=5
+            precision=2
             )
 
 

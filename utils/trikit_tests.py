@@ -27,22 +27,44 @@ ds1 = pd.read_csv(ff1); ds1 = ds1[ds1["LOSS_KEY"]=="WC"]
 t1 = _Triangle(ds0, origin='ORIGIN',dev='DEV',value='VALUE')
 t2 = _Triangle(ds1, origin='ORIGIN',dev='DEV_PERIOD',value='INCRD_LOSS')
 
-
-
-
 i1 = t1.incr
 i2 =  _IncrTriangle(trisize=10)
 i3 = _IncrTriangle()
+
 
 c1 = t1.cum
 c2 = _CumTriangle(trisize=10, incr=False)
 c3 = _CumTriangle(incr=False)
 
+
 # Convert incremental triangle to cumulative.
 i2c = _CumTriangle(i1)
 
+
 # Convert cumulative triangle to incremental.
 c2i = _IncrTriangle(c1)
+ctri = _Triangle(ds0, origin='ORIGIN',dev='DEV',value='VALUE').cumulative
+
+
+
+ta = trikit.load("ta83")
+
+sf = trikit.load("sf")
+sf1 = trikit.load("sf",lob="com_auto")
+
+
+
+
+# ChainLadder tests =>
+cl = trikit.ChainLadder(ds0,origin='ORIGIN',dev='DEV',value='VALUE', tail_fact=1.05)
+
+# Get age to ultimate factors
+cl.age2ult
+
+cl.squared_tri
+
+
+
 
 
 

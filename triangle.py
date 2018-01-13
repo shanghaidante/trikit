@@ -256,7 +256,8 @@ class _CumTriangle(_BaseTriangle):
         self.tritype = "cumulative"
 
         # properties
-        self._a2a = None
+        self._a2a      = None
+        self._a2a_avgs = None
 
 
     @staticmethod
@@ -345,14 +346,16 @@ class _CumTriangle(_BaseTriangle):
 
 
 
-
-    def a2a_avgs(self, addl_avgs=None):
+    @property
+    def a2a_avgs(self):
         """
         Return a DataFrame of various age-to-age averages.
         """
+        if self._a2a_avgs is not None: return(self._a2a_avgs)
+
         indxstrs = list()
 
-        # create lookup table for various average functions
+        # Create lookup table for average functions.
         avgfuncs = {
             'simple'   :self._simple,
             'geometric':self._geometric,
@@ -360,26 +363,11 @@ class _CumTriangle(_BaseTriangle):
             'weighted' :None
             }
 
-        # add additional average durations
-        if addl_avgs is not None:
-            if isinstance(addl_avgs, collections.Sequence):
-                for i in addl_avgs:
-                    if isinstance(i, (int, float)):
-                        if i not in self._nbr_periods:
-                            if i <= self.a2a.shape[0]: self._nbr_periods.append(i)
-
-            else:
-                if isinstance(addl_avgs, (int, float)):
-                    if addl_avgs not in self._nbr_periods:
-                        if addl_avgs <= self.a2a.shape[0]:
-                            self._nbr_periods.append(addl_avgs)
-
-
-        # remove `0` entry, and add as last element of list
+        # Remove `0` entry, and add as last element of list.
         self._nbr_periods = list(set(self._nbr_periods))
         self._nbr_periods.sort()
         self._nbr_periods.append(0)
-        a2a_avg_lst = list(itertools.product(avgfuncs.keys(), self._nbr_periods))
+        a2a_avg_lst = list(itertools.product(avgfuncs.keys(),self._nbr_periods))
 
 
         for i in a2a_avg_lst:
@@ -389,8 +377,10 @@ class _CumTriangle(_BaseTriangle):
             indxstrs.append(iterstr)
 
         indx = sorted(a2a_avg_lst, key=lambda x: x[1])
-        avgsdf = pd.DataFrame(index=indxstrs, columns=self.a2a.columns)
-
+        self._a2a_avgs = pd.DataFrame(
+                                index=indxstrs,
+                                columns=self.a2a.columns
+                                )
 
         for a in enumerate(a2a_avg_lst):
 
@@ -405,9 +395,9 @@ class _CumTriangle(_BaseTriangle):
 
                     t_ic_1, t_ic_2 = self.iloc[:, col], self.iloc[:, (col + 1)]
 
-                    # find first NaN value in t_ic_2
-                    first_nan_year = t_ic_2.index[t_ic_2.apply(np.isnan)][0]
-                    first_nan_indx = t_ic_2.index.searchsorted(first_nan_year)
+                    # Find first NaN value in t_ic_2.
+                    first_nan_year  = t_ic_2.index[t_ic_2.apply(np.isnan)][0]
+                    first_nan_indx  = t_ic_2.index.searchsorted(first_nan_year)
                     final_cell_indx = first_nan_indx
 
                     if duration==0:
@@ -417,9 +407,9 @@ class _CumTriangle(_BaseTriangle):
                         first_cell_indx = (final_cell_indx-duration) if \
                                           (final_cell_indx-duration)>=0 else 0
 
-                    # divide sum of t_ic_2 by t_ic_1
-                    ic_2 = t_ic_2[first_cell_indx:final_cell_indx]
-                    ic_1 = t_ic_1[first_cell_indx:final_cell_indx]
+                    # Divide sum of t_ic_2 by t_ic_1.
+                    ic_2     = t_ic_2[first_cell_indx:final_cell_indx]
+                    ic_1     = t_ic_1[first_cell_indx:final_cell_indx]
                     sum_ic_2 = t_ic_2[first_cell_indx:final_cell_indx].sum()
                     sum_ic_1 = t_ic_1[first_cell_indx:final_cell_indx].sum()
 
@@ -464,9 +454,21 @@ class _CumTriangle(_BaseTriangle):
 
                         iteravg = np.Inf
 
-                avgsdf.loc[indxstr][colstr] = iteravg
+                self._a2a_avgs.loc[indxstr, colstr] = iteravg
 
-        return(avgsdf)
+        return(self._a2a_avgs)
+
+
+
+
+    def plot(self, file=None):
+        """
+        Visualize triangle development patterns. If file is
+        given, save plot to that location.
+        """
+        pass
+
+
 
 
 
@@ -487,8 +489,6 @@ class _Triangle:
 
         self.cum  = _CumTriangle(data,origin=origin,dev=dev,value=value)
         self.incr = _IncrTriangle(data,origin=origin,dev=dev,value=value)
-        self.c           = self.cum
-        self.i           = self.incr
         self.cumulative  = self.cum
         self.incremental = self.incr
 
