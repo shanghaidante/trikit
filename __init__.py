@@ -60,8 +60,22 @@ import sys
 import collections
 import datetime
 import os.path
-from .triangle import _BaseTriangle, _IncrTriangle, _CumTriangle, _Triangle
-from .chain_ladder import *
+
+from .triangle import (
+    _BaseTriangle,
+    _IncrTriangle,
+    _CumTriangle,
+    _Triangle
+    )
+
+from .chain_ladder import (
+    ChainLadder,
+    mack,
+    bootstrap
+    )
+
+#from .chain_ladder import mack
+#from .chain_ladder.mack import MackChainLadder
 from .utils import *
 
 
@@ -71,8 +85,11 @@ from .utils import *
 
 
 # make available at top-level of trikit
-ChainLadder = chain_ladder.ChainLadder
+#ChainLadder = chain_ladder.ChainLadder
+#MackChainLadder = MackChainLadder
 # Bootstrap = bootstrap.Bootstrap
+MackChainLadder = mack.MackChainLadder
+BootChainLadder = bootstrap.BootChainLadder
 
 
 

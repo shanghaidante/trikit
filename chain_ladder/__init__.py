@@ -6,7 +6,12 @@ import numpy as np
 import scipy
 import matplotlib.pyplot as plt
 import seaborn as sns
-from trikit.triangle import _BaseTriangle, _IncrTriangle, _CumTriangle, _Triangle
+from trikit.triangle import (
+    _BaseTriangle,
+    _IncrTriangle,
+    _CumTriangle,
+    _Triangle
+    )
 
 
 

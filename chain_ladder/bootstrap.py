@@ -1,14 +1,19 @@
-from .chain_ladder import BaseMethod
+from ..chain_ladder import ChainLadder
 
 
 
-class Bootstrap(BaseMethod):
+class BootChainLadder(ChainLadder):
     """
     Bootstrap method.
     """
-    def __init__(self, triangle, selection='all-weighted', tail_factor=1.0):
-        BaseMethod.__init__(self, triangle, selection, tail_factor)
-        pass
+    def __init__(self, data, **kwargs):
+
+       super().__init__(data, **kwargs)
+
+    def boot1(self): return(3)
+
+
+
 
 
 
