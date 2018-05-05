@@ -5,14 +5,8 @@ import collections
 import csv
 import os
 import os.path
-import pdb
-import logging
 import sys
 
-
-# pd.set_option('display.max_columns', 1000)
-# pd.set_option('display.width', 500)
-# np.set_printoptions(precision=5, suppress=True)
 
 
 # =============================================================================

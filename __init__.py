@@ -27,7 +27,7 @@ Outstanding Tasks =>
 
  5.] Implement option to output loss emergence as panneled exhibit
 
- 6.] Fix datasets
+ 6.]
 
  7.]
 
@@ -37,15 +37,6 @@ Outstanding Tasks =>
 
 10.]
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-To compute percentiles:
-
-    np.percentile(a, 100*y, axis=None)
-
-    # set axis to 1 if computing percentile on column from a2a triangle
-
-<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 """
 
 # Unit tests should be added (if possible) for each added feature.
@@ -102,13 +93,13 @@ pd.set_option('display.max_columns', 1000)
 pd.set_option('display.width', 500)
 
 np.set_printoptions(
-            edgeitems=3,
-            linewidth=200,
-            suppress=True,
-            nanstr='NaN',
-            infstr='Inf',
-            precision=2
-            )
+    edgeitems=3,
+    linewidth=200,
+    suppress=True,
+    nanstr='NaN',
+    infstr='Inf',
+    precision=2
+    )
 
 
 # pd.set_option('display.chop_threshold', 1.00)

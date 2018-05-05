@@ -21,13 +21,13 @@ class ChainLadder:
     Basic Techniques" Version 3 (Friedland, Jacqueline - 2010), the
     development method ('Chain Ladder') consists of seven basic steps:
 
-        <+> Step 1: Compile claims data in a development triangle
-        <+> Step 2: Calculate age-to-age factors
-        <+> Step 3: Calculate averages of the age-to-age factors
-        <+> Step 4: Select claim development factors
-        <+> Step 5: Select tail factor
-        <+> Step 6: Calculate cumulative claims
-        <+> Step 7: Project ultimate claims
+        Step 1: Compile claims data in a development triangle
+        Step 2: Calculate age-to-age factors
+        Step 3: Calculate averages of the age-to-age factors
+        Step 4: Select claim development factors
+        Step 5: Select tail factor
+        Step 6: Calculate cumulative claims
+        Step 7: Project ultimate claims
 
     The ChainLadder constructor takes for input the specified age-2-age
     average (`sel`), along with a tail factor (`tail_fact`), and populates
@@ -59,7 +59,7 @@ class ChainLadder:
         sel       = kwargs.get('sel', 'all-weighted')
 
 
-        # Obtain cumulative triangle from provided data argument.
+        # Obtain cumulative triangle from specified data argument.
         if isinstance(data, _Triangle):
             self.tri = data.cumulative
 
@@ -72,10 +72,9 @@ class ChainLadder:
         elif set(['origin','dev','value']).issubset(kwargs.keys()):
             self.tri = _Triangle(data,origin=origin,dev=dev,value=value).cum
 
-
-        self.selstr    = sel
+        self.selstr = sel
         self.tail_fact = tail_fact
-        self.selarr    = self.tri.a2a_avgs.loc[self.selstr].values
+        self.selarr = self.tri.a2a_avgs.loc[self.selstr].values
 
         # properties
         self._squared_tri = None
@@ -100,10 +99,7 @@ class ChainLadder:
             self._age2ult = \
                 np.cumprod(np.append(self.selarr,self.tail_fact)[::-1])[::-1]
 
-            # self._age2ult = np.cumprod(self.selarr[::-1])[::-1]
-
         return(self._age2ult.astype(np.float_))
-
 
 
 
@@ -114,6 +110,7 @@ class ChainLadder:
         Project claims growth for each future development period. Returns a
         DataFrame of loss projections for each development period.
         """
+
         if self._squared_tri is None:
 
             self._squared_tri = self.tri.copy(deep=True)
@@ -133,13 +130,13 @@ class ChainLadder:
 
             # Append ultimates to self._full_tri.
             self._squared_tri = pd.merge(
-                            self._squared_tri,
-                            self.ultimates,
-                            right_index=True,
-                            left_index=True
-                            )
+                self._squared_tri,
+                self.ultimates,
+                right_index=True,
+                left_index=True
+                )
 
-        return(self._squared_tri.round(0))
+        return(self._squared_tri)
 
 
 
@@ -171,29 +168,32 @@ class ChainLadder:
     @property
     def summary(self):
         """
-        Returns a DataFrame containing summary statistics resulting
+        Return a DataFrame containing summary statistics resulting
         from applying the development method to tri. Resulting table
         will look like the following:
 
-        AY| AGE of AY@ Eval DATE| REPORTED|AGE-TO-ULT| PROJECTED ULT|
+            [AY|MATURITY|REPORTED|AGE-TO-ULT|PROJECTED ULT]
         """
         if self._summary is None:
 
-            summ_cols = ['latest_diag','CLDF','est_ultimate']
+            summ_cols = ['LATEST','CLDF','ULTIMATE','RESERVE']
 
             self._summary = pd.DataFrame(
                                 columns=summ_cols, index=self.tri.index
                                 )
 
             # Populate self._summary with existing properties if available.
-            self._summary['latest_diag'] = self.tri.latest_diag[::-1]
+            self._summary['LATEST'] = self.tri.latest_diag[::-1]
 
-            self._summary['cldf'] = self.age2ult[::-1]
+            self._summary['CDF']    = self.age2ult[::-1]
 
-            self._summary['est_ultimate'] = self.ultimates
+            #print(self.age2ult[::-1])
+
+
+            self._summary['ULTIMATE'] = self.ultimates
 
             # Append `Total` row to self._summary.
-            self._summary.loc['Total'] = self._summary.sum(numeric_only=True)
+            #self._summary.loc['TOTAL'] = self._summary.sum(numeric_only=True)
 
             # Set CLDF Total value to `NaN`.
             #self._summary.loc['Total','CLDF'] = np.NaN
@@ -203,4 +203,10 @@ class ChainLadder:
 
 
 
+df = pd.DataFrame({
+    'LATEST':clr.tri.latest_diag,
+    'AGE_TO_ULT':clr.age2ult,
+    'ULTIMATE':clr.tri.latest_diag*clr.age2ult
+    })
 
+df[['ULTIMATE']]

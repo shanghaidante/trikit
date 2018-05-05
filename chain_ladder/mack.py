@@ -7,6 +7,20 @@ import pandas as pd
 class MackChainLadder(ChainLadder):
     """
     Perform Mack Chain Ladder method.
+
+    MSE_i = sum(
+
+    Prediction Variance = Estimation Variance + Process Variance
+
+        * Estimation Variance: Inability to accurately define the distribution
+                               from which past events have been generated.
+
+        * Process Variance   : Inability to accurately predict which single
+                               outcome from the distribution will occur at
+                               a given time.
+
+    Prediction Error - Standard Deviation of the forecast
+
     """
     def __init__(self, data, **kwargs):
 
@@ -49,6 +63,36 @@ class MackChainLadder(ChainLadder):
             except ZeroDivisionError: self._mack_stderr[-1] = 0
 
         return(self._mack_stderr)
+
+
+    @property
+    def mack_process_var(self):
+        """
+        The process variance component originates from the stochastic
+        movement of the process.
+        """
+        for i in self.squared_tri[self.tri.shape[0]].values:
+
+            itermult = ""
+
+
+    @property
+    def mack_est_err(self):
+        """
+        The estimation error reflects the uncertainty in
+        the estimation of the parameters.
+        """
+        pass
+
+
+    @property
+    def mack_mse(self):
+        """
+        MSE_i = process variance + estimation error
+        """
+        pass
+
+
 
 
 

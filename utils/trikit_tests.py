@@ -1,4 +1,4 @@
-import sys; sys.path.append("E:\\Repos\\")
+import sys; sys.path.append("U:\\Repos\\")
 import unittest
 import trikit
 import pandas as pd
@@ -8,9 +8,12 @@ import os.path
 import decimal
 import logging
 
-from trikit.triangle import _BaseTriangle, _IncrTriangle, _CumTriangle, _Triangle
-
-
+from trikit.triangle import (
+    _BaseTriangle,
+    _IncrTriangle,
+    _CumTriangle,
+    _Triangle
+    )
 
 
 # TESTING_STATE can be either "print" or "log" =>
@@ -18,10 +21,10 @@ TESTING_STATE = "print"
 
 
 
-ff0 = "E:\\Repos\\trikit\\datasets\\RAA.csv"
+ff0 = "U:\\Repos\\trikit\\datasets\\RAA.csv"
 ds0 = pd.read_csv(ff0)
 
-ff1 = "E:\\Repos\\trikit\\datasets\\WestBendMutual.csv"
+ff1 = "U:\\Repos\\trikit\\datasets\\WestBendMutual.csv"
 ds1 = pd.read_csv(ff1); ds1 = ds1[ds1["LOSS_KEY"]=="WC"]
 
 t1 = _Triangle(ds0, origin='ORIGIN',dev='DEV',value='VALUE')
@@ -62,6 +65,19 @@ sf1 = trikit.load("sf",lob="com_auto")
 # cl.age2ult
 #
 # cl.squared_tri
+
+
+
+
+clr = trikit.ChainLadder(t1)
+
+
+
+
+
+cl = trikit.ChainLadder(ta,origin='ORIGIN',dev='DEV',value='VALUE')
+
+cl.summary
 
 
 mcl = trikit.MackChainLadder(ta,origin='ORIGIN',dev='DEV',value='VALUE', tail_fact=1.)

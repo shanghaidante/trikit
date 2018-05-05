@@ -1,50 +1,60 @@
 # Introduction
 The `trikit` package is a collection of Loss Reserving tools and techniques
-created for the purpose of simplifying Actuarial analyses in Python, with
-particular focus on automating the basic techniques generally used for
+created for the purpose of facilitating Actuarial analysis in Python, with
+particular emphasis on automating the basic techniques generally used for
 estimating unpaid claim liabilities. `trikit` current implements the Chain
 Ladder (or *development*) method for ultimate loss projection, as well as
 techniques to estimate the error in Chain Ladder estimates via the Mack and
 Bootstrap methods.
 <br>
+
+## Sample Datasets
 In addition to tools and techniques, `trikit` is shipped with sample
-datasets that can be used to gain familiarity with the package's interface.
-`trikit.datasets` contains data from the [Casualty Actuarial Society's Loss
-Reserving Datasets](http://www.casact.org/research/index.cfm?fa=loss_reserves_data)
-compiled and maintained by Glenn Meyers. These datasets have been aggregated
-over carrier and partitioned by industry, and include paid and reported losses
-for the following lines of business:
-
-*  Workers Compensation
-*  Products Liability
-*  Personal Passenger Auto
-*  Other Liability
-*  Medical Malpractice
-*  Commercial Auto
-
-Any of these datasets can be loaded into Python by calling the `load` function,
-which takes an optional `lob` keyword. `lob` is set to Workers Compensation
-by default, but can be instructed to load any of the other datasets by
-providing its associated `lob` argument:
-
-|Line of Business         |`lob` Argument |
-|:-----------------------:|:-------------:|
-|Workers Compensation     |`workers_comp` |
-|Products Liability       |`prod_liab`    |
-|Personal Passenger Auto  |`pp_auto`      |
-|Other Liability          |`other_liab`   |
-|Medical Malpractice      |`med_mal`      |
-|Commercial Auto          |`com_auto`     |
-|                         |               |
+datasets that can be used to gain familiarity with the library's interface.
+`trikit.datasets` contains selections from the [Casualty Actuarial Society's Loss
+Reserve Database](http://www.casact.org/research/index.cfm?fa=loss_reserves_data),
+compiled and maintained by Glenn Meyers and Peng Shi and made available by the
+National Association of Insurance Commissioners (NAIC), as well as datasets
+commonly referenced in actuarial literature. Datasets can be loaded by calling
+`trikit`'s `load` function, specifying `dataset` and optionally `lob`
+(Line of Business). What follows is a table of available datasets and
+the argument(s) required to retrieve them (the collection of available sample datasets
+is frequently augmented, so check back periodically for new additions):
 <br>
-For example, to load the 'Other Liability' dataset into Python, we'd run:
+|`dataset` Argument|`dataset` Description             |`lob` Argument |`lob` Description      | Origin                    |
+|:----------------:|:--------------------------------:|:-------------:|:---------------------:|:-------------------------:|
+|`wbm`             |West Bend Mutual NAIC Schedule P  |`workers_comp` |Workers' Compensation  |CAS Loss Reserving Database|
+|`wbm`             |West Bend Mutual NAIC Schedule P  |`prod_liab`    |Product Liability      |CAS Loss Reserving Database|
+|`wbm`             |West Bend Mutual NAIC Schedule P  |`pp_auto`      |Private Passenger Auto |CAS Loss Reserving Database|
+|`wbm`             |West Bend Mutual NAIC Schedule P  |`othr_liab`    |Other Liability        |CAS Loss Reserving Database|
+|`wbm`             |West Bend Mutual NAIC Schedule P  |`com_auto`     |Commercial Auto        |CAS Loss Reserving Database|
+|`wbm`             |West Bend Mutual NAIC Schedule P  |`workers_comp` |Workers' Compensation  |CAS Loss Reserving Database|
+|`sf`              |State Farm NAIC Schedule P        |`workers_comp` |Workers' Compensation  |CAS Loss Reserving Database|
+|`sf`              |State Farm NAIC Schedule P        |`prod_liab`    |Product Liability      |CAS Loss Reserving Database|
+|`sf`              |State Farm NAIC Schedule P        |`pp_auto`      |Private Passenger Auto |CAS Loss Reserving Database|
+|`sf`              |State Farm NAIC Schedule P        |`othr_liab`    |Other Liability        |CAS Loss Reserving Database|
+|`sf`              |State Farm NAIC Schedule P        |`com_auto`     |Commercial Auto        |CAS Loss Reserving Database|
+|`sf`              |State Farm NAIC Schedule P        |`workers_comp` |Workers' Compensation  |CAS Loss Reserving Database|
+|`aeg`             |Aegis NAIC Schedule P             |`pp_auto`      |Private Passenger Auto |CAS Loss Reserving Database|
+|`aeg`             |Aegis NAIC Schedule P             |`othr_liab`    |Other Liability        |CAS Loss Reserving Database|
+|`aeg`             |Aegis NAIC Schedule P             |`com_auto`     |Commercial Auto        |CAS Loss Reserving Database|
+|`raa`             |Reinsurance Association of America|None           |None                   |Actuarial Literature       |
+|`ta83`            |Taylor-Ashe 1983 Loss Triangle    |None           |None                   |Actuarial Literature       |
 <br>
+
+Note that as contained in `trikit`, losses for all sample datasets are
+initially in *incremental* form.
+<br>
+We next demonstrate how to load a sample dataset using trikit's `load` utility.
+The following example loads the `WestBendMutual` `workers_comp` dataset:
+<br>
+
 ```python
 >>> import trikit
->>> othrliab = trikit.load(lob="other_liab")
->>> type(othrliab)
+>>> wc = trikit.load("WestBendMutual", lob="workers_comp")
+>>> type(wc)
 pandas.core.frame.DataFrame
->>> othrliab.head
+>>> wc.head
 
    ORIGIN  DEV_PERIOD  INCRD_LOSS
 0    1988           1      295980
@@ -55,53 +65,82 @@ pandas.core.frame.DataFrame
 
 ```
 <br>
-Once the dataset has been loaded, it's straightforward to transform incremental
+
+Once a dataset has been loaded, it's straightforward to transform incremental
 losses into a `Triangle` type. Three arguments need to be provided: The origin
 year (or accident year) as `origin`, the development period as `dev` and the
-loss amount of interest as `value`. Referring again to the 'Other Liability'
-sample dataset, `_Incremental` and `_Cumulative` triangle types are initialized
+loss amount of interest as `value`. Referring again to the `WestBendMutual` `workers_comp`
+sample dataset, `_Incremental` and `_Cumulative` triangle types can be initialized
 as follows:
+
 <br>
 ```python
-# initializing Incremental and Cumulative triangles
+# Initializing Incremental and Cumulative triangles.
 # from 'Other Liability' builtin dataset:
 >>> import trikit
->>> othrliab = trikit.load(lob="other_liab")
->>> inc = trikit._Incremental(othrliab, origin="ORIGIN", dev="DEV", value="VALUE")
->>> cum = trikit._Cumulative(othrliab, origin="ORIGIN", dev="DEV", value="VALUE")
+>>> wc = trikit.load("WestBendMutual", lob="workers_comp")
+>>> inc_tri = trikit._Incremental(wc, origin="ORIGIN", dev="DEV", value="VALUE")
+>>> cum_tri = trikit._Cumulative(wc, origin="ORIGIN", dev="DEV", value="VALUE")
 >>> type(inc)
 trikit.triangle._Incremental
 >>> type(cum)
 trikit.triangle._Cumulative
 
 ```
+<br>
+However, if the goal is to estimate unpaid claim liabilities using the chain ladder
+method, there's no need to convert the dataset of interest into a
+`Triangle` type. trikit's `ChainLadder` constructor can take as input a dataset,
+`_Incremental` triangle or `_Cumulative` triangle objects, and will produce upaid
+or IBNR estimates as expected. We'll demonstrate calling the `ChainLadder`
+constructor all three objects as input.
+<br>
 
-Initializing incremental or cumulative triangles from data from file is just
-as easy. Provide the name of the delimited datafile as the first
-argument to the constructor, along with the file delimiter (optional):
+
+### Incremental Dataset as `ChainLadder` Input
+For the first example, we demonstrate how to obtain unpaid claim liability estimates
+by passing a non-`Triangle` object as input. We refer to the *Taylor-Ashe 1983 Loss Triangle*
+dataset. We read the dataset in as before:
+<br>
+
+```python
+>>> import trikit
+>>> ta = trikit.load("ta83")
+>>> ta.head()
+   ORIGIN  DEV   VALUE
+0       1    1  357848
+1       1    2  766940
+2       1    3  610542
+3       1    4  482940
+4       1    5  527326
+```
+<br>
+
+The minimum required arguments for `ChainLadder` are `origin`, `dev` and `value`,
+which, if referring to the Taylor-Ashe dataset, would be passed to `ChainLadder` as
+`origin="ORIGIN"`, `dev="DEV"` and `value="VALUE"`. Optionally, a `tail_factor`
+argument can be provided. Otherwise, `tail_factor=1.0`. For this example, we'll
+keep the default `tail_factor=1.0` assumption.
 <br>
 ```python
-# initializing triangles from file
 >>> import trikit
->>> tri_data = "path/to/triangle_data.csv"
->>> inc = trikit._Incremental(tri_data, sep=",", origin="ORIGIN", dev="DEV", value="VALUE")
->>> cum = trikit._Cumulative(tri_data, sep=",", origin="ORIGIN", dev="DEV", value="VALUE")
->>> type(inc)
-trikit.triangle._Incremental
->>> type(cum)
-trikit.triangle._Cumulative
+>>> cl = trikit.ChainLadder(ta, origin="ORIGIN", dev="DEV", value="VALUE")
+>>> type(cl)
+trikit.chain_ladder.ChainLadder
+>>> [i for i in dir(cl) if not i.startswith("_")]
+['age2ult',
+ 'selarr',
+ 'selstr',
+ 'squared_tri',
+ 'summary',
+ 'tail_fact',
+ 'tri',
+ 'ultimates']
 
 ```
-
-
-
-
-
-
-
-
-
-
+<br>
+In the last line, we list the `ChainLadder` object's attributes. `summary`
+returns a `DataFrame` containing
 
 
 
